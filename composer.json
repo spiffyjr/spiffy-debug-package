@@ -6,7 +6,7 @@
             "email": "theman@spiffyjr.me"
         }
     ],
-    "description": "Spiffy\\DBALPackage is a package for SpiffyFramework that integrates Doctrine DBAL.",
+    "description": "Spiffy\\DebugPackage is a package for SpiffyFramework to help debug your application.",
     "require": {
         "php": ">=5.4",
         "symfony/stopwatch": "~2.5"
@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Spiffy\\DBALPackage\\": [
+            "Spiffy\\DebugPackage\\": [
                 "src/",
                 "test/"
             ]
