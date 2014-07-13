@@ -9,6 +9,8 @@
     "description": "Spiffy\\DebugPackage is a package for SpiffyFramework to help debug your application.",
     "require": {
         "php": ">=5.4",
+        "maximebf/debugbar": "~1.0",
+        "spiffy/spiffy-assetic-package": "~1.0-dev",
         "symfony/stopwatch": "~2.5"
     },
     "require-dev": {

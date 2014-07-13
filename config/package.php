@@ -3,8 +3,6 @@
 return [
     'debug' => [],
     'framework' => [
-        'plugins' => [
-            'Spiffy\DebugPackage\TestPlugin'
-        ]
+        'twig' => ['paths' => [__DIR__ . '/../view']],
     ]
 ];
