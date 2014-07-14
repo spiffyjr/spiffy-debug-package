@@ -13,13 +13,16 @@ final class RespondPlugin implements Plugin
     /** @var StandardDebugBar */
     private $bar;
     
+    public function __construct()
+    {
+        $this->bar = new StandardDebugBar();
+    }
+    
     /**
      * {@inheritDoc}
      */
     public function plug(Manager $events)
     {
-        $events->on(Application::EVENT_BOOTSTRAP, [$this, 'initialize'], 15000);
-        
         $events->on(Application::EVENT_BOOTSTRAP, [$this, 'bootstrapStart'], 10000);
         $events->on(Application::EVENT_BOOTSTRAP, [$this, 'bootstrapStop'], -10000);
 
@@ -38,11 +41,6 @@ final class RespondPlugin implements Plugin
         $events->on(Application::EVENT_RESPOND, [$this, 'renderToolbar'], -15000);
     }
     
-    public function initialize(ApplicationEvent $e)
-    {
-        $this->bar = new StandardDebugBar();
-    }
-
     public function bootstrapStart(ApplicationEvent $e)
     {
         $this->bar['time']->startMeasure('bootstrap');
