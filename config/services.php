@@ -1,5 +1,7 @@
 <?php
  
 return [
-    'Spiffy\DebugPackage\Plugin\RespondPlugin' => ['Spiffy\DebugPackage\Plugin\RespondPlugin'],
+    'debug.bar' => 'Spiffy\DebugPackage\DebugBarFactory',
+    'debug.plugin.respond' => 'Spiffy\DebugPackage\Plugin\RespondPluginFactory',
+    'debug.plugin.toolbar' => ['Spiffy\DebugPackage\Plugin\ToolbarPlugin', ['@debug.bar']],
 ];

@@ -2,20 +2,19 @@
 
 namespace Spiffy\DebugPackage\Plugin;
 
-use DebugBar\StandardDebugBar;
+use DebugBar\DataCollector\TimeDataCollector;
 use Spiffy\Event\Manager;
 use Spiffy\Event\Plugin;
 use Spiffy\Framework\Application;
-use Spiffy\Framework\ApplicationEvent;
 
 final class RespondPlugin implements Plugin
 {
-    /** @var StandardDebugBar */
-    private $bar;
+    /** @var TimeDataCollector */
+    private $collector;
     
-    public function __construct()
+    public function __construct(TimeDataCollector $collector)
     {
-        $this->bar = new StandardDebugBar();
+        $this->collector = $collector;
     }
     
     /**
@@ -23,9 +22,6 @@ final class RespondPlugin implements Plugin
      */
     public function plug(Manager $events)
     {
-        $events->on(Application::EVENT_BOOTSTRAP, [$this, 'bootstrapStart'], 10000);
-        $events->on(Application::EVENT_BOOTSTRAP, [$this, 'bootstrapStop'], -10000);
-
         $events->on(Application::EVENT_RESPOND, [$this, 'respondStart'], 10000);
         $events->on(Application::EVENT_RESPOND, [$this, 'respondStop'], -10000);
         
@@ -37,78 +33,60 @@ final class RespondPlugin implements Plugin
         
         $events->on(Application::EVENT_RENDER, [$this, 'renderStart'], 10000);
         $events->on(Application::EVENT_RENDER, [$this, 'renderStop'], -10000);
-        
-        $events->on(Application::EVENT_RESPOND, [$this, 'renderToolbar'], -15000);
+
+        $events->on(Application::EVENT_ROUTE, [$this, 'addBootstrapTime'], 10001);
     }
     
-    public function bootstrapStart(ApplicationEvent $e)
+    public function respondStart()
     {
-        $this->bar['time']->startMeasure('bootstrap');
+        $this->collector->startMeasure('framework.respond');
     }
 
-    public function bootstrapStop(ApplicationEvent $e)
+    public function respondStop()
     {
-        $this->bar['time']->stopMeasure('bootstrap');
+        $this->collector->stopMeasure('framework.respond');
     }
 
-    public function respondStart(ApplicationEvent $e)
+    public function routeStart()
     {
-        $this->bar['time']->startMeasure('respond');
+        $this->collector->startMeasure('framework.route');
     }
 
-    public function respondStop(ApplicationEvent $e)
+    public function routeStop()
     {
-        $this->bar['time']->stopMeasure('respond');
+        $this->collector->stopMeasure('framework.route');
     }
 
-    public function routeStart(ApplicationEvent $e)
+    public function dispatchStart()
     {
-        $this->bar['time']->startMeasure('route');
+        $this->collector->startMeasure('framework.dispatch');
     }
 
-    public function routeStop(ApplicationEvent $e)
+    public function dispatchStop()
     {
-        $this->bar['time']->stopMeasure('route');
+        $this->collector->stopMeasure('framework.dispatch');
     }
 
-    public function dispatchStart(ApplicationEvent $e)
+    public function renderStart()
     {
-        $this->bar['time']->startMeasure('dispatch');
+        $this->collector->startMeasure('framework.render');
     }
 
-    public function dispatchStop(ApplicationEvent $e)
+    public function renderStop()
     {
-        $this->bar['time']->stopMeasure('dispatch');
-    }
-    
-    public function renderStart(ApplicationEvent $e)
-    {
-        $this->bar['time']->startMeasure('render');
+        $this->collector->stopMeasure('framework.render');
     }
 
-    public function renderStop(ApplicationEvent $e)
+    public function addBootstrapTime()
     {
-        $this->bar['time']->stopMeasure('render');
-    }
-    
-    public function renderToolbar(ApplicationEvent $e)
-    {
-        $renderer = $this->bar->getJavascriptRenderer();
-        $renderer->setIncludeVendors(false);
+        if (!isset($_SESSION[BootstrapPlugin::BOOTSTRAP_START]) || !isset($_SESSION[BootstrapPlugin::BOOTSTRAP_END])) {
+            return;
+        }
 
-        $this->bar->addCollector(new \DebugBar\Bridge\DoctrineCollector($e->getApplication()->getInjector()->nvoke('doctrine-orm.main.logger')));
-
-        $response = $e->getResponse();
-        $content = $response->getContent();
-
-        list($cssCollection, $jsCollection) = $renderer->getAsseticCollection();
-        
-        $css = sprintf('<style type="text/css">%s</style>', $cssCollection->dump());
-        $js = sprintf('<script type="text/javascript">%s</script>', $jsCollection->dump());
-        
-        $content = preg_replace('/<\/head>/i', $css . $js . "\n</head>", $content, 1);
-        $content = preg_replace('/<\/body>/i', $renderer->render() . "\n</body>", $content, 1);
-        
-        $response->setContent($content);
+        $this->collector->addMeasure(
+            'framework.bootstrap',
+            $_SESSION[BootstrapPlugin::BOOTSTRAP_START],
+            $_SESSION[BootstrapPlugin::BOOTSTRAP_END]
+        );
     }
 }
